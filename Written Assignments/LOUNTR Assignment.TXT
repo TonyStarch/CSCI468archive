@@ -1,0 +1,43 @@
+																	Brandon Tweed
+																	CSCI 468
+																	Instructor: Dr. Rannie
+																	Due: W1L2
+																	Homework 1: LOUNTR
+
+1. Write LOUNTR in explicit assembler:
+
+         MACRO
+         LOUNTR
+         UNPK  0(9,1),12(5,1)
+         TR    0(8,1),X'700'
+         BC    B'1111',16(,1)
+         DC    C'0123456789ABCDEF'
+         MEND
+         
+2. Why X'7E0'?
+
+The TR instruction gives a starting address for the translation table of X'700'. Any values may be used for the first 240 bytes of the table since the only values to be translated all will have 'F' as the zone digit. In other words, the area at displacement X'F0' into the table is what we need to be concerned about. Knowing that the character constant defining the translation table should be aligned at X'7F0', we can deduce that the macro's starting address must be X'7F0' minus the length of the instructions contained in the macro (16 bytes). X'7F0' - X'10' gives a starting address for the macro of X'7E0'.
+
+3. What does it do?
+
+The macro is used to convert any 4 bytes (intended for a fullword numeric value)into a format that is printable.
+
+4. How do you use it?
+
+First, move the 4 bytes to be put into printable format into the 16-byte buffer to be used by LOUNTR, which in this case I shall call X.
+
+
+         MVC   X+12(4),TARGET         MOVE THE TARGET INTO WORK AREA
+         
+Then, the programmer should issue a call to lounter by doing the following:
+
+         BAL   1,LOUNTR               INVOKE LOUNTER TO CONVERT
+
+Just after the call to LOUNTR, the user should define the storage area to be used by LOUNTR.
+
+X        DC    CL16'L'                STORAGE AREA FOR LOUNTR CALL
+
+After LOUNTR has done its job, the printable version of these bytes should be moved to an output buffer for printing.
+
+         MVC   BUFFER(8),X            MOVE CONVERTED BYTES TO BUFFER
+
